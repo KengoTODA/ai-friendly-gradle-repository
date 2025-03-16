@@ -1,0 +1,85 @@
+---
+description: Rules to code Gradle builds scripts, and manage version and settings of the Gradle itself.
+globs: gradle.properties,gradle/libs.versions.toml,gradle/wrapper/gradle-wrapper.properties,*.gradle.kts,buildSrc/**/*.kts
+alwaysApply: false
+---
+# Gradle Cursor Rule
+
+This file describes the rules applied to our Gradle build scripts.  
+When writing Gradle build scripts, prefer Kotlin scripts over Groovy.
+
+## Version Control for Gradle
+
+- **Gradle Version:**
+  - Use the Gradle Wrapper to control the Gradle version.
+  - Always apply the latest stable Gradle release in our builds.
+  - To determine the latest stable release, visit https://gradle.org/releases.
+
+## Version Control for Dependencies
+
+- **Dependencies Versioning:**
+  - Use the Version Catalog to manage dependency versions.
+  - Do not specify dependency versions directly in individual build scripts excluding `settings.gradle.kts`.
+  - When multiple libraries share the same version, prefer using a BOM (bill-of-materials) if available.
+  - If no BOM is provided, use the `[versions]` section in the Version Catalog for centralized version control.
+  - When adding a new dependency, always register it in the version catalog and reference it in the build script via libs.
+
+## Version Control for Gradle Plugins
+
+- **Gradle Plugins:**
+  - Manage Gradle plugin versions using the Version Catalog.
+  - Do not declare plugin versions directly in the build scripts.
+  - When adding a new plugin, always register it in the version catalog and reference it via libs.
+
+## Pre-compiled Plugin
+
+We use a pre-compiled plugin stored in the buildSrc to:
+
+- Centralize policies and convention management.
+- Keep build scripts sufficiently declarative.
+
+Each build script in the pre-compiled plugin should have documentation comment describing the purpose of the build script.
+
+### Referencing the Version Catalog from the Pre-compiled Plugin
+
+Since pre-compiled plugins cannot refer to the Version Catalog by default, add the following snippet to `buildSrc/settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+}
+```
+
+In `buildSrc/build.gradle.kts`, reference the Version Catalog as follows:
+
+```kotlin
+dependencies {
+    implementation(
+        libs.plugins.develocity.map {
+            "com.example:foobar-gradle-plugin:${it.version}"
+        }
+    )
+}
+```
+
+Then, in each `buildSrc/src/main/kotlin/*.gradle.kts` file, you can use the declared plugins from the Version Catalog without specifying a version:
+
+```kotlin
+plugins {
+    id("com.example.foobar") // No version declaration is required
+}
+```
+
+## Reproducible Builds
+
+- Ensure all build artifacts are reproducible.
+- Refer to the Gradle Reproducible Archives documentation at https://docs.gradle.org/current/userguide/working_with_files.html#sec:reproducible_archives for guidelines on how to achieve this.
+
+## Testing
+
+- For testing projects written in any JVM language, prefer using the jvm-test-suite plugin to declare test environments and dependencies.
+- See the Gradle JVM Test Suite Plugin documentation at https://docs.gradle.org/current/userguide/jvm_test_suite_plugin.html for more details.

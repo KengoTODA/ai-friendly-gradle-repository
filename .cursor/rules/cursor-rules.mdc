@@ -1,0 +1,8 @@
+---
+description: Rules for Cursor Rules
+globs: .cursor/rules/*.mdc
+alwaysApply: false
+---
+# Rules for Cursor Rules
+
+- Do not use `[string](URL)` style hyperlinks. Cursor may break it by replacing it with `[string](mdc:URL)`.
