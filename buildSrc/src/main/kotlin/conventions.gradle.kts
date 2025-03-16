@@ -24,6 +24,9 @@ kotlin {
     }
 }
 
+// The following settings are applied to ensure reproducible builds:
+// - File timestamps are not preserved to avoid differences in build outputs
+// - File order is consistent to ensure the same output every time
 tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
