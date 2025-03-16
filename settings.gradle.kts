@@ -7,7 +7,7 @@ pluginManagement {
         }
         gradlePluginPortal()
         maven(url = "https://repo1.maven.org/maven2/") {
-            name = "fallback for the Maven Central repository"
+            name = "fallback for the Maven Central"
         }
     }
 }
@@ -17,9 +17,9 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral {
             name = "Maven Central"
-            content {
-                excludeGroup("com.example")
-            }
+        }
+        maven(url = "https://repo1.maven.org/maven2/") {
+            name = "fallback for the Maven Central"
         }
     }
 }
